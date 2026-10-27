@@ -87,6 +87,27 @@ El programa también:
 
 **Iones radical (OE⁺•)**: no tienen HIA. Se detectan los grupos funcionales y se estima de forma cualitativa la abundancia esperada del ion según el orden empírico de estabilidad del ion molecular en EI (aromáticos > alquenos conjugados > alicíclicos > sulfuros > alcanos lineales > cetonas > aminas > ésteres > éteres > ácidos > alcanos ramificados > alcoholes). También se indica el sitio probable de ionización, una energía de ionización aproximada y las fragmentaciones esperadas (ruptura α, bencílica, McLafferty…).
 
+## Versión web
+
+```bash
+node server.js
+```
+
+Abre la interfaz en `http://localhost:3000` (puerto configurable con la variable `PORT`). La API:
+
+| Ruta | Descripción |
+|---|---|
+| `POST /api/analizar` | `{ "formula": "C7H7+", "smiles": "[cH+]1cccccc1", "nombre": "…" }` → análisis |
+| `POST /api/comparar` | arreglo de fragmentos (máx. 30) → resultados ordenados |
+| `GET /api/ejemplos` | fragmentos de ejemplo analizados |
+| `GET /salud` | comprobación de estado |
+
+### Despliegue con Docker / Dokploy
+
+El repositorio incluye un `Dockerfile` (Node 22 Alpine, puerto 3000, usuario sin privilegios y *healthcheck* en `/salud`).
+
+En Dokploy: crear una aplicación con origen GitHub (`PGBeermann/stability`, rama `main`), tipo de construcción **Dockerfile**, y en *Domains* añadir el dominio con puerto de contenedor **3000** y HTTPS (Let's Encrypt). El dominio debe tener un registro DNS **A** que apunte a la IP del VPS.
+
 ## Uso como biblioteca
 
 ```js

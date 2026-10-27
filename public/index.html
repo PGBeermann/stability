@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estabilidad de cationes EI-MS</title>
+<meta name="description" content="Estima la estabilidad de cationes fragmento de espectrometría de masas por ionización electrónica a partir de su fórmula y estructura.">
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --texto: #1c2430; --suave: #5b6676; --borde: #dfe3ea;
+    --acento: #1f6feb; --acento-txt: #ffffff; --codigo: #eef1f6;
+    --c1: #1a7f37; --c2: #4c9a2a; --c3: #b88a00; --c4: #d4651c; --c5: #c62828;
+    --estab: #1a7f37; --desest: #c62828; --sombra: 0 1px 3px rgba(20,30,50,.08);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1318; --panel: #171c23; --texto: #e4e8ee; --suave: #9aa5b4; --borde: #2a323d;
+      --acento: #4c8dff; --acento-txt: #0b0f14; --codigo: #212833;
+      --c1: #3fb950; --c2: #7cc35a; --c3: #d7a928; --c4: #ee8a45; --c5: #f0605d;
+      --estab: #3fb950; --desest: #f0605d; --sombra: none;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--texto); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 28px 16px 8px; max-width: 1180px; margin: 0 auto; }
+  header h1 { margin: 0; font-size: 1.6rem; letter-spacing: -.01em; }
+  header p { margin: 6px 0 0; color: var(--suave); max-width: 760px; }
+  main { max-width: 1180px; margin: 0 auto; padding: 16px; display: grid; gap: 16px; grid-template-columns: minmax(0, 380px) minmax(0, 1fr); align-items: start; }
+  @media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+  .panel { background: var(--panel); border: 1px solid var(--borde); border-radius: 10px; padding: 18px; box-shadow: var(--sombra); min-width: 0; }
+  .panel h2 { margin: 0 0 12px; font-size: 1.05rem; }
+  label { display: block; font-weight: 600; font-size: .9rem; margin: 12px 0 4px; }
+  label small { font-weight: 400; color: var(--suave); }
+  input { width: 100%; padding: 9px 11px; border: 1px solid var(--borde); border-radius: 7px; background: var(--bg); color: var(--texto); font: 15px ui-monospace, Consolas, monospace; }
+  input:focus { outline: 2px solid var(--acento); outline-offset: 1px; }
+  button { cursor: pointer; font: inherit; }
+  .primario { margin-top: 16px; width: 100%; padding: 10px; border: 0; border-radius: 7px; background: var(--acento); color: var(--acento-txt); font-weight: 600; }
+  .primario:disabled { opacity: .6; cursor: default; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .chip { border: 1px solid var(--borde); background: var(--bg); color: var(--texto); border-radius: 999px; padding: 4px 10px; font-size: .82rem; }
+  .chip:hover { border-color: var(--acento); }
+  details { margin-top: 16px; font-size: .88rem; }
+  summary { cursor: pointer; font-weight: 600; }
+  code, .mono { font-family: ui-monospace, Consolas, monospace; font-size: .88em; background: var(--codigo); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+  table { width: 100%; border-collapse: collapse; font-size: .9rem; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { color: var(--suave); font-weight: 600; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .tabla-scroll { overflow-x: auto; }
+  .vacio { color: var(--suave); text-align: center; padding: 48px 12px; }
+  .error { border: 1px solid var(--desest); color: var(--desest); border-radius: 8px; padding: 12px; }
+  .cabecera-res { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
+  .clase { font-size: 1.15rem; font-weight: 650; margin: 0; }
+  .sub { color: var(--suave); font-size: .9rem; margin: 2px 0 0; overflow-wrap: anywhere; }
+  .indice { text-align: right; }
+  .indice .valor { font-size: 2rem; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+  .insignia { display: inline-block; margin-top: 4px; padding: 2px 9px; border-radius: 999px; font-size: .78rem; font-weight: 700; color: #fff; }
+  .medidor { height: 10px; border-radius: 99px; background: var(--codigo); margin: 14px 0 6px; overflow: hidden; }
+  .medidor > div { height: 100%; border-radius: 99px; }
+  .interp { margin: 6px 0 0; }
+  .datos { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 16px 0; }
+  .dato { background: var(--bg); border: 1px solid var(--borde); border-radius: 8px; padding: 8px 10px; min-width: 0; }
+  .dato b { display: block; font-size: .75rem; color: var(--suave); text-transform: uppercase; letter-spacing: .03em; }
+  .dato span { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+  h3 { font-size: .95rem; margin: 18px 0 6px; }
+  .barra-c { display: inline-block; height: 8px; border-radius: 4px; vertical-align: middle; margin-right: 6px; }
+  .pos { color: var(--desest); } .neg { color: var(--estab); }
+  ul.lista { margin: 4px 0; padding-left: 20px; }
+  ul.lista li { margin: 3px 0; }
+  .aviso { color: var(--c4); }
+  .completo { grid-column: 1 / -1; }
+  footer { max-width: 1180px; margin: 0 auto; padding: 8px 16px 32px; color: var(--suave); font-size: .82rem; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Estabilidad de cationes fragmento (EI-MS)</h1>
+  <p>Indique la fórmula y la estructura (SMILES) de un fragmento de ionización electrónica. El programa estima su estabilidad y explica qué efectos la determinan.</p>
+</header>
+<main>
+  <section class="panel" aria-labelledby="t-entrada">
+    <h2 id="t-entrada">Fragmento</h2>
+    <form id="form">
+      <label for="formula">Fórmula del ion <small>p. ej. C7H7+, C6H6+•</small></label>
+      <input id="formula" name="formula" autocomplete="off" spellcheck="false" placeholder="C7H7+">
+      <label for="smiles">Estructura en SMILES <small>marque la carga: [CH2+]</small></label>
+      <input id="smiles" name="smiles" autocomplete="off" spellcheck="false" placeholder="[cH+]1cccccc1" required>
+      <label for="nombre">Nombre <small>(opcional)</small></label>
+      <input id="nombre" name="nombre" autocomplete="off" placeholder="Ion tropilio">
+      <button class="primario" type="submit" id="btn">Analizar</button>
+    </form>
+    <label>Ejemplos</label>
+    <div class="chips" id="chips"></div>
+    <details>
+      <summary>Cómo escribir la estructura</summary>
+      <table>
+        <tr><td>tert-butilo</td><td><code>C[C+](C)C</code></td></tr>
+        <tr><td>bencilo</td><td><code>[CH2+]c1ccccc1</code></td></tr>
+        <tr><td>tropilio</td><td><code>[cH+]1cccccc1</code></td></tr>
+        <tr><td>acetilo</td><td><code>CC#[O+]</code></td></tr>
+        <tr><td>iminio</td><td><code>C=[NH2+]</code></td></tr>
+        <tr><td>fenilo</td><td><code>[c+]1ccccc1</code></td></tr>
+        <tr><td>benceno M⁺•</td><td><code>c1ccccc1</code></td></tr>
+      </table>
+      <p>El átomo cargado va entre corchetes con sus H. Para un ion molecular (OE⁺•) basta la estructura neutra de la molécula.</p>
+    </details>
+  </section>
+
+  <section class="panel" id="resultado" aria-live="polite">
+    <div class="vacio">Escriba un fragmento o elija un ejemplo para ver el análisis.</div>
+  </section>
+
+  <section class="panel completo" aria-labelledby="t-comp">
+    <h2 id="t-comp">Comparación de fragmentos típicos</h2>
+    <div class="tabla-scroll"><table id="tabla-comp"><tbody><tr><td class="vacio">Cargando…</td></tr></tbody></table></div>
+    <p class="sub">HIA = afinidad por hidruro estimada (kcal/mol), solo para iones EE⁺: menor HIA = catión más estable. En iones OE⁺• el índice es cualitativo. Haga clic en una fila para ver su análisis.</p>
+  </section>
+</main>
+<footer>
+  Modelo empírico con fines educativos (incertidumbre típica ±10 kcal/mol). La intensidad real de un pico depende también de la cinética y de la competencia entre rutas de fragmentación.
+  Código: <a href="https://github.com/PGBeermann/stability">github.com/PGBeermann/stability</a>
+</footer>
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id);
+  const el = (tag, props = {}, ...hijos) => {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === 'class') n.className = v; else if (k === 'style') n.style.cssText = v; else if (k.startsWith('on')) n.addEventListener(k.slice(2), v); else n.setAttribute(k, v);
+    }
+    for (const h of hijos.flat()) if (h !== null && h !== undefined && h !== false) n.append(h instanceof Node ? h : String(h));
+    return n;
+  };
+  const COLORES = { 'MUY ESTABLE': '--c1', 'ESTABLE': '--c2', 'MODERADAMENTE ESTABLE': '--c3', 'POCO ESTABLE': '--c4', 'MUY INESTABLE': '--c5' };
+  const color = (cat) => `var(${COLORES[cat] || '--suave'})`;
+  const fmt = (x, d = 1) => Number(x).toFixed(d).replace('-', '−');
+
+  async function api(ruta, cuerpo) {
+    const r = await fetch(ruta, cuerpo ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(cuerpo) } : undefined);
+    const datos = await r.json().catch(() => ({ error: 'Respuesta no válida del servidor.' }));
+    if (!r.ok) throw new Error(datos.error || `Error ${r.status}`);
+    return datos;
+  }
+
+  function lista(titulo, items, clase) {
+    if (!items || !items.length) return null;
+    return [el('h3', {}, titulo), el('ul', { class: 'lista' + (clase ? ' ' + clase : '') }, items.map((t) => el('li', {}, t)))];
+  }
+
+  function dato(t, v) { return el('div', { class: 'dato' }, el('b', {}, t), el('span', {}, v)); }
+
+  function render(r) {
+    const cont = $('resultado');
+    cont.replaceChildren();
+    const f = r.formula;
+    const tipo = r.tipoIon === 'EE' ? 'EE⁺ (electrones pares)' : 'OE⁺• (ion radical)';
+    cont.append(
+      el('div', { class: 'cabecera-res' },
+        el('div', {},
+          el('p', { class: 'clase' }, r.nombre ? `${r.nombre}: ${r.clase}` : r.clase),
+          el('p', { class: 'sub' }, `${f.hill} · ${tipo} · `, el('span', { class: 'mono' }, r.entrada.smiles))),
+        el('div', { class: 'indice' },
+          el('div', { class: 'valor' }, r.indice, el('small', { style: 'font-size:.9rem;color:var(--suave)' }, '/100')),
+          el('span', { class: 'insignia', style: `background:${color(r.categoria)}` }, r.categoria))),
+      el('div', { class: 'medidor', role: 'img', 'aria-label': `Índice de estabilidad ${r.indice} de 100` },
+        el('div', { style: `width:${r.indice}%;background:${color(r.categoria)}` })),
+      el('p', { class: 'interp' }, r.interpretacion),
+    );
+
+    const datos = el('div', { class: 'datos' },
+      dato('m/z monoisotópica', `${f.mz.toFixed(4)} (nominal ${f.mzNominal})`),
+      r.hia !== null ? dato('HIA estimada', `${fmt(r.hia)} kcal/mol`) : dato('Energía de ionización', `≈ ${r.energiaIonizacion} eV`),
+      dato('RDB', r.tipoIon === 'EE' ? `${f.rdb} → ${f.rdbEstructural} anillos + π` : `${f.rdb} (anillos + π)`),
+      dato('Isótopos (aprox.)', `M+1 ${f.isotopos.m1.toFixed(1)} % · M+2 ${f.isotopos.m2.toFixed(1)} %`),
+      r.tipoIon === 'EE'
+        ? dato('Centro catiónico', `átomo ${r.sitio.atomo} (${r.sitio.elemento}) · ${r.estructurasResonantes} forma(s) resonante(s)`)
+        : dato('Sitio de ionización', r.sitioIonizacion),
+      dato('Estructura', `${r.estructura.formula} ${r.estructura.coincideConFormula ? '✓ coincide con la fórmula' : '✗ no coincide con la fórmula'}`),
+    );
+    cont.append(datos);
+    if (r.ionConocido) cont.append(el('p', {}, el('b', {}, 'Ion diagnóstico: '), r.ionConocido));
+    if (r.smilesAnalizado && r.smilesAnalizado !== r.entrada.smiles && r.tipoIon === 'EE') {
+      cont.append(el('p', { class: 'sub' }, 'Forma analizada (Kekulé / carga en el carbono): ', el('span', { class: 'mono' }, r.smilesAnalizado)));
+    }
+    if (r.grupos) cont.append(el('p', {}, el('b', {}, 'Grupos detectados: '), r.grupos.map((g) => g.cantidad > 1 ? `${g.grupo} ×${g.cantidad}` : g.grupo).join(', ')));
+
+    const maxAbs = Math.max(1, ...r.contribuciones.filter((c) => c.tipo !== 'base').map((c) => Math.abs(c.valor)));
+    const filas = r.contribuciones.map((c) => {
+      const esBase = c.tipo === 'base';
+      const clase = esBase ? '' : (c.valor < 0 === (r.hia !== null) ? 'neg' : 'pos');
+      const ancho = esBase ? 0 : Math.round((Math.abs(c.valor) / maxAbs) * 80);
+      return el('tr', {},
+        el('td', {}, c.concepto),
+        el('td', { class: 'num ' + clase },
+          esBase ? '' : el('span', { class: 'barra-c', style: `width:${ancho}px;background:currentColor;opacity:.55` }),
+          esBase ? fmt(c.valor) : (c.valor > 0 ? '+' : '') + fmt(c.valor)));
+    });
+    if (r.hia !== null) filas.push(el('tr', {}, el('td', {}, el('b', {}, 'HIA estimada (menor = más estable)')), el('td', { class: 'num' }, el('b', {}, fmt(r.hia)))));
+    cont.append(
+      el('h3', {}, r.hia !== null ? 'Contribuciones a la afinidad por hidruro (kcal/mol)' : 'Contribuciones al índice'),
+      el('div', { class: 'tabla-scroll' }, el('table', {}, el('tbody', {}, filas))),
+    );
+    if (r.reordenamientos && r.reordenamientos.length) {
+      cont.append(...lista('Reordenamientos favorables', r.reordenamientos.map((x) => `${x.descripcion} → ${x.smiles} (${x.clase}); HIA ${fmt(x.hia)} (${fmt(x.delta)} kcal/mol), índice ${x.indice}.`)));
+    }
+    for (const bloque of [
+      lista('Fragmentaciones esperadas', r.fragmentaciones),
+      lista('Notas', r.notas),
+      lista('Advertencias', r.advertencias, 'aviso'),
+      [el('h3', {}, 'Regla del nitrógeno'), el('p', { class: 'sub' }, f.reglaNitrogeno)],
+    ]) if (bloque) cont.append(...bloque);
+  }
+
+  function mostrarError(msg) {
+    $('resultado').replaceChildren(el('div', { class: 'error' }, el('b', {}, 'No se pudo analizar: '), msg));
+  }
+
+  async function analizar(frag) {
+    const btn = $('btn');
+    btn.disabled = true;
+    btn.textContent = 'Analizando…';
+    try {
+      render(await api('/api/analizar', frag));
+      if (window.innerWidth < 860) $('resultado').scrollIntoView({ behavior: 'smooth' });
+    } catch (e) {
+      mostrarError(e.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Analizar';
+    }
+  }
+
+  function cargarEnFormulario(f) {
+    $('formula').value = f.formula || '';
+    $('smiles').value = f.smiles || '';
+    $('nombre').value = f.nombre || '';
+    analizar(f);
+  }
+
+  $('form').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    analizar({ formula: $('formula').value, smiles: $('smiles').value, nombre: $('nombre').value || undefined });
+  });
+
+  api('/api/ejemplos').then(({ ejemplos, resultados }) => {
+    $('chips').replaceChildren(...ejemplos.map((f) => el('button', { type: 'button', class: 'chip', onclick: () => cargarEnFormulario(f) }, f.nombre)));
+    const cab = el('tr', {}, el('th', {}, '#'), el('th', {}, 'Fragmento'), el('th', {}, 'Fórmula'), el('th', { class: 'num' }, 'm/z'), el('th', {}, 'Tipo'), el('th', { class: 'num' }, 'HIA'), el('th', { class: 'num' }, 'Índice'), el('th', {}, 'Categoría'));
+    const filas = resultados.filter((r) => !r.error).map((r, i) => el('tr', { style: 'cursor:pointer', onclick: () => cargarEnFormulario(r.entrada.formula ? { ...r.entrada, nombre: r.nombre } : r.entrada) },
+      el('td', {}, i + 1), el('td', {}, r.nombre), el('td', { class: 'mono' }, r.formula.texto),
+      el('td', { class: 'num' }, r.formula.mz.toFixed(2)), el('td', {}, r.tipoIon),
+      el('td', { class: 'num' }, r.hia === null ? '—' : fmt(r.hia)), el('td', { class: 'num' }, r.indice),
+      el('td', {}, el('span', { class: 'insignia', style: `background:${color(r.categoria)}` }, r.categoria))));
+    $('tabla-comp').replaceChildren(el('thead', {}, cab), el('tbody', {}, filas));
+  }).catch((e) => {
+    $('tabla-comp').replaceChildren(el('tbody', {}, el('tr', {}, el('td', { class: 'error' }, e.message))));
+  });
+})();
+</script>
+</body>
+</html>
