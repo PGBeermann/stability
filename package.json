@@ -1,0 +1,19 @@
+{
+  "name": "estabilidad-cation-eims",
+  "version": "1.0.0",
+  "description": "Calcula la estabilidad de cationes fragmento de EI-MS a partir de la fórmula y la estructura (SMILES).",
+  "main": "src/index.js",
+  "bin": {
+    "estabilidad-cation": "bin/estabilidad-cation.js"
+  },
+  "scripts": {
+    "start": "node bin/estabilidad-cation.js",
+    "ejemplos": "node bin/estabilidad-cation.js --ejemplos",
+    "test": "node --test"
+  },
+  "keywords": ["espectrometría de masas", "EI-MS", "carbocatión", "química", "educación"],
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT"
+}

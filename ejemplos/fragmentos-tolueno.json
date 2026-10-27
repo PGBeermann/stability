@@ -1,0 +1,8 @@
+[
+  { "nombre": "Tolueno M+•", "formula": "C7H8+•", "smiles": "Cc1ccccc1" },
+  { "nombre": "Tropilio (m/z 91)", "formula": "C7H7+", "smiles": "[cH+]1cccccc1" },
+  { "nombre": "Bencilo (m/z 91)", "formula": "C7H7+", "smiles": "[CH2+]c1ccccc1" },
+  { "nombre": "Fenilo (m/z 77)", "formula": "C6H5+", "smiles": "[c+]1ccccc1" },
+  { "nombre": "C5H5+ (m/z 65)", "formula": "C5H5+", "smiles": "[CH+]1C=CC=C1" },
+  { "nombre": "Ciclopropenilo (m/z 39)", "formula": "C3H3+", "smiles": "c1c[cH+]1" }
+]
